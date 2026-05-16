@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeetCode Tracker CLI – Code Walkthrough</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; }
+
+    .slide {
+      width: 960px;
+      margin: 32px auto;
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 48px 56px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+      page-break-after: always;
+    }
+
+    .slide-number { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+
+    h1 { font-size: 34px; font-weight: 800; color: #f8fafc; margin-bottom: 8px; }
+    h2 { font-size: 22px; font-weight: 700; color: #f8fafc; margin-bottom: 24px; padding-bottom: 10px; border-bottom: 2px solid #334155; }
+    h3 { font-size: 14px; font-weight: 700; color: #38bdf8; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    p  { font-size: 14px; line-height: 1.7; color: #94a3b8; margin-bottom: 10px; }
+
+    .subtitle { font-size: 17px; color: #64748b; margin-bottom: 32px; line-height: 1.6; }
+
+    .tag { display: inline-block; background: #0f172a; color: #38bdf8; border: 1px solid #1e3a5f; border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 600; margin: 4px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    pre {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 20px;
+      overflow-x: auto;
+      font-size: 12.5px;
+      line-height: 1.7;
+      font-family: 'Fira Code', 'Cascadia Code', monospace;
+      color: #e2e8f0;
+    }
+
+    .kw  { color: #c084fc; }
+    .fn  { color: #38bdf8; }
+    .str { color: #86efac; }
+    .cm  { color: #475569; font-style: italic; }
+    .kv  { color: #fbbf24; }
+    .num { color: #fb923c; }
+
+    .annotation { background: #0f172a; border-left: 3px solid #38bdf8; padding: 12px 16px; border-radius: 4px; margin-top: 12px; font-size: 13px; color: #94a3b8; line-height: 1.6; }
+    .annotation strong { color: #38bdf8; }
+
+    .file-label { display: inline-block; background: #334155; color: #94a3b8; font-size: 11px; font-family: monospace; padding: 4px 12px; border-radius: 6px 6px 0 0; margin-bottom: -1px; }
+
+    .callout { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; }
+    .callout.blue   { border-left: 3px solid #38bdf8; }
+    .callout.green  { border-left: 3px solid #4ade80; }
+    .callout.purple { border-left: 3px solid #c084fc; }
+    .callout.orange { border-left: 3px solid #fb923c; }
+
+    ul { padding-left: 18px; }
+    ul li { font-size: 13px; line-height: 1.9; color: #94a3b8; }
+    ul li strong { color: #e2e8f0; }
+
+    .cover-links { margin-top: 40px; display: flex; gap: 32px; }
+    .cover-link { font-size: 13px; color: #475569; }
+    .cover-link strong { display: block; color: #94a3b8; font-size: 14px; margin-bottom: 2px; }
+
+    @media print {
+      body { background: #0f172a; }
+      .slide { box-shadow: none; margin: 0; border-radius: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SLIDE 1: Cover -->
+  <div class="slide">
+    <div class="slide-number">01 / 08 — Code Walkthrough</div>
+    <h1>LeetCode/DSA Tracker CLI</h1>
+    <p class="subtitle">A deep dive into how the code works — CLI wiring with Commander.js, JSON persistence, smart name/ID resolution, CSV import, and topic digest generation.</p>
+    <div>
+      <span class="tag">Node.js</span>
+      <span class="tag">Commander.js</span>
+      <span class="tag">Inquirer.js</span>
+      <span class="tag">Chalk</span>
+      <span class="tag">csv-parse</span>
+    </div>
+    <div class="cover-links">
+      <div class="cover-link"><strong>npm</strong>npmjs.com/package/leetcode-tracker</div>
+      <div class="cover-link"><strong>GitHub</strong>github.com/Shivarawat/leetcode-tracker</div>
+      <div class="cover-link"><strong>Install</strong>npm install -g leetcode-tracker</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: Project Structure -->
+  <div class="slide">
+    <div class="slide-number">02 / 08 — Project Structure</div>
+    <h2>How the Code is Organized</h2>
+    <div class="grid-2">
+      <div>
+        <h3>File Tree</h3>
+        <pre><span class="kv">leetcode-tracker/</span>
+├── index.js              <span class="cm"># CLI entry — all command definitions</span>
+├── package.json          <span class="cm"># bin: lct + leetcode-tracker</span>
+└── <span class="fn">src/</span>
+    ├── store.js          <span class="cm"># read/write ~/.leetcode-tracker/data.json</span>
+    ├── resolveQuery.js   <span class="cm"># ID or name → problem with picker</span>
+    ├── display.js        <span class="cm"># colored terminal output helpers</span>
+    └── <span class="fn">commands/</span>
+        ├── add.js
+        ├── show.js
+        ├── comment.js
+        ├── takeaway.js
+        ├── approach.js   <span class="cm"># interactive with editor prompt</span>
+        ├── list.js
+        ├── revisit.js
+        ├── review.js
+        ├── stats.js
+        ├── digest.js
+        ├── deleteCmd.js
+        ├── exportCmd.js
+        └── importCmd.js  <span class="cm"># Google Sheets CSV import</span></pre>
+      </div>
+      <div>
+        <h3>How a command flows</h3>
+        <pre><span class="cm">1. User runs: lct show "two sum"</span>
+
+<span class="cm">2. index.js — Commander parses it:</span>
+program
+  .<span class="fn">command</span>(<span class="str">'show &lt;query&gt;'</span>)
+  .<span class="fn">action</span>(show);  <span class="cm">// calls show.js</span>
+
+<span class="cm">3. show.js — resolves the query:</span>
+<span class="kw">const</span> <span class="kv">problem</span> = <span class="kw">await</span> <span class="fn">resolveQuery</span>(query);
+
+<span class="cm">4. resolveQuery.js — finds the match:</span>
+<span class="cm">   exact ID → return immediately</span>
+<span class="cm">   1 title match → return it</span>
+<span class="cm">   multiple → show Inquirer picker</span>
+
+<span class="cm">5. display.js — prints to terminal:</span>
+<span class="fn">printProblem</span>(problem);</pre>
+        <div class="annotation">
+          <strong>Pattern:</strong> Every command follows the same shape — resolve query → read/write store → display output. This makes adding new commands trivial.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: Store & Data Layer -->
+  <div class="slide">
+    <div class="slide-number">03 / 08 — Data Layer</div>
+    <h2>store.js — JSON Persistence</h2>
+    <div class="file-label">src/store.js</div>
+    <pre><span class="kw">const</span> <span class="kv">DATA_DIR</span>  = path.<span class="fn">join</span>(os.<span class="fn">homedir</span>(), <span class="str">'.leetcode-tracker'</span>);
+<span class="kw">const</span> <span class="kv">DATA_FILE</span> = path.<span class="fn">join</span>(DATA_DIR, <span class="str">'data.json'</span>);
+
+<span class="cm">// Lazy init — creates dir and file on first run</span>
+<span class="kw">const</span> <span class="fn">load</span> = () => {
+  <span class="kw">if</span> (!fs.<span class="fn">existsSync</span>(DATA_DIR))  fs.<span class="fn">mkdirSync</span>(DATA_DIR, { <span class="kv">recursive</span>: <span class="kw">true</span> });
+  <span class="kw">if</span> (!fs.<span class="fn">existsSync</span>(DATA_FILE)) fs.<span class="fn">writeFileSync</span>(DATA_FILE, <span class="fn">JSON.stringify</span>({ <span class="kv">problems</span>: [] }));
+  <span class="kw">return</span> <span class="fn">JSON.parse</span>(fs.<span class="fn">readFileSync</span>(DATA_FILE, <span class="str">'utf-8'</span>));
+};
+
+<span class="cm">// Upsert: update if exists, insert if not</span>
+<span class="kw">const</span> <span class="fn">upsert</span> = (problem) => {
+  <span class="kw">const</span> <span class="kv">data</span> = <span class="fn">load</span>();
+  <span class="kw">const</span> <span class="kv">idx</span> = data.problems.<span class="fn">findIndex</span>((p) => <span class="fn">String</span>(p.id) === <span class="fn">String</span>(problem.id));
+  <span class="kw">if</span> (idx >= <span class="num">0</span>) data.problems[idx] = problem; <span class="cm">// update</span>
+  <span class="kw">else</span> data.problems.<span class="fn">push</span>(problem);            <span class="cm">// insert</span>
+  fs.<span class="fn">writeFileSync</span>(DATA_FILE, <span class="fn">JSON.stringify</span>(data, <span class="kw">null</span>, <span class="num">2</span>));
+};</pre>
+    <div class="annotation">
+      <strong>Why ~/.leetcode-tracker?</strong> Storing in the home directory means the data persists globally regardless of which terminal or project directory you're in — same convention used by <code>~/.ssh</code>, <code>~/.gitconfig</code>, and <code>~/.npmrc</code>. Lazy init means no setup step — the first command creates everything automatically.
+    </div>
+  </div>
+
+  <!-- SLIDE 4: resolve() — Smart Lookup -->
+  <div class="slide">
+    <div class="slide-number">04 / 08 — Smart Lookup</div>
+    <h2>resolve() + resolveQuery() — ID or Name</h2>
+    <div class="grid-2">
+      <div>
+        <h3>store.js — resolve()</h3>
+        <div class="file-label">src/store.js</div>
+        <pre><span class="kw">const</span> <span class="fn">resolve</span> = (query) => {
+  <span class="kw">const</span> <span class="kv">problems</span> = <span class="fn">load</span>().problems;
+
+  <span class="cm">// 1. Try exact ID match first</span>
+  <span class="kw">const</span> <span class="kv">byId</span> = problems.<span class="fn">find</span>((p) =>
+    <span class="fn">String</span>(p.id) === <span class="fn">String</span>(query)
+  );
+  <span class="kw">if</span> (byId) <span class="kw">return</span> { <span class="kv">problem</span>: byId, <span class="kv">matches</span>: [byId] };
+
+  <span class="cm">// 2. Fall back to partial title match</span>
+  <span class="kw">const</span> <span class="kv">matches</span> = problems.<span class="fn">filter</span>((p) =>
+    p.title?.<span class="fn">toLowerCase</span>()
+      .<span class="fn">includes</span>(<span class="fn">String</span>(query).<span class="fn">toLowerCase</span>())
+  );
+
+  <span class="cm">// Exactly one match → return it</span>
+  <span class="kw">if</span> (matches.length === <span class="num">1</span>)
+    <span class="kw">return</span> { <span class="kv">problem</span>: matches[<span class="num">0</span>], <span class="kv">matches</span> };
+
+  <span class="cm">// 0 or many → caller handles it</span>
+  <span class="kw">return</span> { <span class="kv">problem</span>: <span class="kw">null</span>, <span class="kv">matches</span> };
+};</pre>
+      </div>
+      <div>
+        <h3>resolveQuery.js — with picker</h3>
+        <div class="file-label">src/resolveQuery.js</div>
+        <pre><span class="kw">const</span> <span class="fn">resolveQuery</span> = <span class="kw">async</span> (query) => {
+  <span class="kw">const</span> { <span class="kv">problem</span>, <span class="kv">matches</span> } = <span class="fn">resolve</span>(query);
+
+  <span class="cm">// Single match — return immediately</span>
+  <span class="kw">if</span> (problem) <span class="kw">return</span> problem;
+
+  <span class="cm">// No matches — exit with error</span>
+  <span class="kw">if</span> (!matches.length) {
+    console.<span class="fn">log</span>(<span class="fn">chalk.red</span>(`No match for "${query}"`));
+    <span class="kw">return null</span>;
+  }
+
+  <span class="cm">// Multiple matches — show picker</span>
+  <span class="kw">const</span> { <span class="kv">chosen</span> } = <span class="kw">await</span> inquirer.<span class="fn">prompt</span>([{
+    <span class="kv">type</span>: <span class="str">'list'</span>,
+    <span class="kv">name</span>: <span class="str">'chosen'</span>,
+    <span class="kv">message</span>: `Multiple matches. Pick one:`,
+    <span class="kv">choices</span>: matches.<span class="fn">map</span>((p) => ({
+      <span class="kv">name</span>: `#${p.id} — ${p.title}`,
+      <span class="kv">value</span>: p,
+    })),
+  }]);
+  <span class="kw">return</span> chosen;
+};</pre>
+        <div class="annotation" style="margin-top: 10px;">
+          <strong>Why split into two functions?</strong> <code>resolve()</code> is pure — no side effects, easy to test. <code>resolveQuery()</code> adds the async Inquirer UI on top. Commands that need silent lookups (like import) use <code>resolve()</code> directly.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: Commander CLI Wiring -->
+  <div class="slide">
+    <div class="slide-number">05 / 08 — CLI Wiring</div>
+    <h2>index.js — Commander.js Setup</h2>
+    <div class="file-label">index.js</div>
+    <pre><span class="kw">const</span> { <span class="kv">Command</span> } = <span class="fn">require</span>(<span class="str">'commander'</span>);
+<span class="kw">const</span> <span class="kv">program</span> = <span class="kw">new</span> <span class="fn">Command</span>();
+
+program
+  .<span class="fn">name</span>(<span class="str">'leetcode-tracker'</span>)
+  .<span class="fn">description</span>(<span class="str">'Personal DSA problem tracker'</span>)
+  .<span class="fn">version</span>(<span class="str">'1.0.0'</span>);
+
+<span class="cm">// Each command: name, args, options, action handler</span>
+program
+  .<span class="fn">command</span>(<span class="str">'add &lt;id&gt; &lt;title&gt; &lt;difficulty&gt;'</span>)
+  .<span class="fn">description</span>(<span class="str">'Add a new problem'</span>)
+  .<span class="fn">option</span>(<span class="str">'--topic &lt;topic&gt;'</span>, <span class="str">'Topic (e.g. graphs)'</span>)
+  .<span class="fn">option</span>(<span class="str">'--dsalgo &lt;dsalgo&gt;'</span>, <span class="str">'DS/Algo used'</span>)
+  .<span class="fn">option</span>(<span class="str">'--link &lt;link&gt;'</span>, <span class="str">'Problem URL'</span>)
+  .<span class="fn">action</span>(add);  <span class="cm">// add.js handles the logic</span>
+
+program
+  .<span class="fn">command</span>(<span class="str">'list'</span>)
+  .<span class="fn">option</span>(<span class="str">'--topic &lt;topic&gt;'</span>)
+  .<span class="fn">option</span>(<span class="str">'--difficulty &lt;difficulty&gt;'</span>)
+  .<span class="fn">option</span>(<span class="str">'--search &lt;search&gt;'</span>)
+  .<span class="fn">option</span>(<span class="str">'--sort &lt;sort&gt;'</span>, <span class="str">'recent | difficulty | revisits'</span>)
+  .<span class="fn">action</span>(list);
+
+program.<span class="fn">parse</span>(process.argv); <span class="cm">// parse and dispatch</span></pre>
+    <div class="annotation">
+      <strong>How Commander works:</strong> <code>program.parse(process.argv)</code> reads the terminal arguments, matches them to the registered command, validates required args, and calls the <code>.action()</code> handler with the parsed values. The <code>bin</code> field in <code>package.json</code> maps <code>lct</code> and <code>leetcode-tracker</code> to <code>index.js</code> — so both aliases work after <code>npm install -g</code>.
+    </div>
+  </div>
+
+  <!-- SLIDE 6: CSV Import -->
+  <div class="slide">
+    <div class="slide-number">06 / 08 — CSV Import</div>
+    <h2>importCmd.js — Google Sheets Import</h2>
+    <div class="file-label">src/commands/importCmd.js</div>
+    <pre><span class="kw">const</span> <span class="fn">importCmd</span> = (filePath) => {
+  <span class="kw">const</span> <span class="kv">content</span> = fs.<span class="fn">readFileSync</span>(filePath, <span class="str">'utf-8'</span>);
+
+  <span class="cm">// csv-parse turns each row into a { columnName: value } object</span>
+  <span class="kw">const</span> <span class="kv">records</span> = <span class="fn">parse</span>(content, { <span class="kv">columns</span>: <span class="kw">true</span>, <span class="kv">trim</span>: <span class="kw">true</span> });
+
+  records.<span class="fn">forEach</span>((row) => {
+    <span class="kw">const</span> <span class="kv">id</span> = <span class="fn">String</span>(row[<span class="str">'S. No.'</span>] ?? row[<span class="str">'id'</span>]).<span class="fn">trim</span>();
+    <span class="kw">if</span> (!id) { skipped++; <span class="kw">return</span>; } <span class="cm">// skip blank rows</span>
+
+    <span class="cm">// Build approaches array from optional columns</span>
+    <span class="kw">const</span> <span class="kv">approaches</span> = [];
+    <span class="kw">const</span> <span class="fn">buildApproach</span> = (suffix, tcKey, scKey) => {
+      <span class="kw">const</span> <span class="kv">name</span> = (row[`Approach ${suffix}`] || <span class="str">''</span>).<span class="fn">trim</span>();
+      <span class="kw">if</span> (name) approaches.<span class="fn">push</span>({
+        name,
+        <span class="kv">timeComplexity</span>:  row[tcKey] || <span class="str">''</span>,
+        <span class="kv">spaceComplexity</span>: row[scKey] || <span class="str">''</span>,
+      });
+    };
+    <span class="fn">buildApproach</span>(<span class="str">'1'</span>, <span class="str">'TC'</span>, <span class="str">'SC'</span>);   <span class="cm">// required</span>
+    <span class="fn">buildApproach</span>(<span class="str">'2'</span>, <span class="str">'TC2'</span>, <span class="str">'SC2'</span>); <span class="cm">// optional</span>
+    <span class="fn">buildApproach</span>(<span class="str">'3'</span>, <span class="str">'TC3'</span>, <span class="str">'SC3'</span>); <span class="cm">// optional</span>
+
+    <span class="cm">// Upsert — preserves existing comments/solutions if re-importing</span>
+    <span class="kw">const</span> <span class="kv">existing</span> = <span class="fn">getById</span>(id);
+    <span class="kw">const</span> <span class="kv">problem</span> = existing || { id, <span class="kv">solvedAt</span>: <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">toISOString</span>() };
+    problem.title    = row[<span class="str">'Problem Statement'</span>];
+    problem.takeaway = row[<span class="str">'Things to Remember'</span>];
+    <span class="fn">upsert</span>(problem);
+  });
+};</pre>
+    <div class="annotation">
+      <strong>Smart re-import:</strong> If you re-import the same sheet after adding more problems, the upsert logic preserves any comments, solutions, or revisit counts you've added through the CLI — it only overwrites the sheet-level fields (title, approaches, takeaway).
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Stats + Streak -->
+  <div class="slide">
+    <div class="slide-number">07 / 08 — Stats & Streak</div>
+    <h2>stats.js — Aggregation & Streak Calculation</h2>
+    <div class="grid-2">
+      <div>
+        <h3>Aggregation by topic/algo</h3>
+        <div class="file-label">src/commands/stats.js</div>
+        <pre><span class="cm">// Count problems per topic</span>
+<span class="kw">const</span> <span class="kv">byTopic</span> = {};
+problems.<span class="fn">forEach</span>((p) => {
+  <span class="kw">const</span> <span class="kv">t</span> = p.topic || <span class="str">'uncategorized'</span>;
+  byTopic[t] = (byTopic[t] || <span class="num">0</span>) + <span class="num">1</span>;
+});
+
+<span class="cm">// Sort by count descending</span>
+Object.<span class="fn">entries</span>(byTopic)
+  .<span class="fn">sort</span>((a, b) => b[<span class="num">1</span>] - a[<span class="num">1</span>])
+  .<span class="fn">forEach</span>(([topic, count]) => {
+    console.<span class="fn">log</span>(`${topic}: ${count}`);
+  });</pre>
+      </div>
+      <div>
+        <h3>Streak calculation</h3>
+        <pre><span class="cm">// Get unique solve dates (midnight normalized)</span>
+<span class="kw">const</span> <span class="kv">dates</span> = [...<span class="kw">new</span> <span class="fn">Set</span>(
+  problems.<span class="fn">map</span>((p) => {
+    <span class="kw">const</span> <span class="kv">d</span> = <span class="kw">new</span> <span class="fn">Date</span>(p.solvedAt);
+    d.<span class="fn">setHours</span>(<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>,<span class="num">0</span>);
+    <span class="kw">return</span> d.<span class="fn">getTime</span>(); <span class="cm">// timestamp</span>
+  })
+)].<span class="fn">sort</span>((a, b) => b - a); <span class="cm">// newest first</span>
+
+<span class="kw">let</span> <span class="kv">streak</span> = <span class="num">0</span>;
+<span class="kw">let</span> <span class="kv">current</span> = today.<span class="fn">getTime</span>();
+
+<span class="kw">for</span> (<span class="kw">const</span> <span class="kv">date</span> <span class="kw">of</span> dates) {
+  <span class="cm">// Check if date is today or yesterday</span>
+  <span class="kw">if</span> (date === current || date === current - <span class="num">86400000</span>) {
+    streak++;
+    current = date - <span class="num">86400000</span>; <span class="cm">// step back one day</span>
+  } <span class="kw">else break</span>; <span class="cm">// gap found — streak ends</span>
+}</pre>
+        <div class="annotation" style="margin-top: 10px;">
+          <strong>86400000</strong> = 24 × 60 × 60 × 1000 ms = exactly one day. Normalizing to midnight before comparing ensures two problems solved on the same day count as one streak day, not two.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: Interview Q&A with Code -->
+  <div class="slide">
+    <div class="slide-number">08 / 08 — Interview Answers</div>
+    <h2>Code-Level Interview Questions</h2>
+
+    <div class="callout blue" style="margin-bottom: 16px;">
+      <h3>Q: How does partial name search work without a database?</h3>
+      <p>The <code>resolve()</code> function in store.js loads the JSON array into memory and uses <code>Array.filter()</code> with <code>String.includes()</code> for case-insensitive matching. With ~500–1000 problems this is instantaneous — no need for indexed search. If the dataset grew to tens of thousands, I'd switch to SQLite with a <code>LIKE</code> query or add a simple trie for prefix search.</p>
+    </div>
+
+    <div class="callout green" style="margin-bottom: 16px;">
+      <h3>Q: How does the import handle re-importing without losing data?</h3>
+      <p>The <code>upsert()</code> function checks if a problem with that ID already exists. If it does, it updates only the sheet-level fields (title, approaches, takeaway) while preserving CLI-added data like comments, solutions, and revisit counts. This means you can update your Google Sheet and re-import safely without losing anything you've added through the CLI.</p>
+    </div>
+
+    <div class="callout purple" style="margin-bottom: 16px;">
+      <h3>Q: Why does the bin field in package.json have two entries?</h3>
+      <p>The <code>bin</code> field maps command names to the entry file. Having both <code>"leetcode-tracker"</code> and <code>"lct"</code> means npm creates symlinks for both names in the global bin directory during <code>npm install -g</code>. Users can type either — the short alias for daily use, the full name for clarity in scripts or documentation.</p>
+    </div>
+
+    <div class="callout orange">
+      <h3>Q: What would you add next?</h3>
+      <ul>
+        <li><strong>GitHub Gist sync</strong> — back up data.json to a private Gist so it persists across machines</li>
+        <li><strong>SQLite migration</strong> — better querying and atomic writes once the dataset grows large</li>
+        <li><strong>TUI mode</strong> — use <code>ink</code> (React for CLIs) for an interactive terminal dashboard</li>
+        <li><strong>LeetCode API integration</strong> — auto-populate title, difficulty, and tags from the problem URL</li>
+      </ul>
+    </div>
+  </div>
+
+</body>
+</html>

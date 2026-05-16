@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeetCode Tracker CLI – Project Explainer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; color: #1a1a2e; }
+
+    .slide {
+      width: 900px;
+      min-height: 500px;
+      margin: 32px auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 48px 56px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      page-break-after: always;
+    }
+
+    .slide-number { font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+
+    h1 { font-size: 32px; font-weight: 800; color: #1a1a2e; margin-bottom: 8px; }
+    h2 { font-size: 24px; font-weight: 700; color: #1a1a2e; margin-bottom: 24px; border-bottom: 3px solid #0070d2; padding-bottom: 10px; }
+    h3 { font-size: 16px; font-weight: 700; color: #0070d2; margin-bottom: 8px; }
+    p  { font-size: 15px; line-height: 1.7; color: #374151; margin-bottom: 12px; }
+
+    .subtitle { font-size: 18px; color: #64748b; margin-bottom: 32px; }
+
+    .tag { display: inline-block; background: #e0f0ff; color: #0070d2; border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 600; margin: 4px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+    .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; }
+    .card.blue   { border-left: 4px solid #0070d2; }
+    .card.green  { border-left: 4px solid #22c55e; }
+    .card.purple { border-left: 4px solid #a78bfa; }
+    .card.orange { border-left: 4px solid #f59e0b; }
+    .card.red    { border-left: 4px solid #ef4444; }
+
+    ul { padding-left: 20px; }
+    ul li { font-size: 15px; line-height: 1.9; color: #374151; }
+
+    code { background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 13px; color: #0070d2; }
+
+    .cmd { background: #1e293b; color: #86efac; font-family: monospace; font-size: 13px; padding: 12px 16px; border-radius: 8px; margin: 6px 0; }
+
+    .cover-meta { margin-top: 40px; display: flex; gap: 32px; }
+    .cover-meta-item { font-size: 14px; color: #64748b; }
+    .cover-meta-item strong { display: block; color: #1a1a2e; font-size: 15px; }
+
+    .hero-accent { display: inline-block; background: linear-gradient(135deg, #0070d2, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .qa { margin-bottom: 24px; }
+    .question { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+    .answer { font-size: 14px; color: #374151; line-height: 1.7; padding: 12px 16px; background: #f8fafc; border-left: 3px solid #0070d2; border-radius: 4px; }
+
+    @media print {
+      body { background: #fff; }
+      .slide { box-shadow: none; margin: 0; border-radius: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SLIDE 1: Cover -->
+  <div class="slide">
+    <div class="slide-number">01 / 07</div>
+    <h1><span class="hero-accent">LeetCode/DSA Tracker CLI</span></h1>
+    <p class="subtitle">A personal command-line tool to track DSA problems with approaches, time/space complexity, takeaways, spaced-repetition reviews, and topic digests. Published to npm.</p>
+    <div>
+      <span class="tag">Node.js</span>
+      <span class="tag">Commander.js</span>
+      <span class="tag">Inquirer.js</span>
+      <span class="tag">Chalk</span>
+      <span class="tag">csv-parse</span>
+      <span class="tag">npm published</span>
+    </div>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><strong>npm</strong>npmjs.com/package/leetcode-tracker</div>
+      <div class="cover-meta-item"><strong>GitHub</strong>github.com/Shivarawat/leetcode-tracker</div>
+      <div class="cover-meta-item"><strong>Install</strong>npm install -g leetcode-tracker</div>
+      <div class="cover-meta-item"><strong>Built by</strong>Shiv Charan</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: What It Does -->
+  <div class="slide">
+    <div class="slide-number">02 / 07</div>
+    <h2>What It Does</h2>
+    <div class="grid-2">
+      <div class="card blue">
+        <h3>Problem Tracking</h3>
+        <p>Add problems with difficulty, topic, DS/Algo used, and a direct link. Supports both ID and partial name lookup — type <code>lct show "two sum"</code> instead of remembering the number.</p>
+      </div>
+      <div class="card green">
+        <h3>Approaches & Complexity</h3>
+        <p>Attach multiple approaches to each problem, each with a name, time complexity, space complexity, solution code, and a note. Opens your editor for multi-line solutions.</p>
+      </div>
+      <div class="card purple">
+        <h3>Spaced Repetition Review</h3>
+        <p>Track when you last revisited each problem. <code>lct review</code> shows everything not reviewed in 7+ days — so you don't forget what you've solved.</p>
+      </div>
+      <div class="card orange">
+        <h3>Topic Digest</h3>
+        <p><code>lct digest graphs</code> aggregates all takeaways, approaches used, and comments for a topic into one view. Export to Markdown for revision sheets.</p>
+      </div>
+      <div class="card red">
+        <h3>Google Sheets Import</h3>
+        <p>Export your existing DSA sheet as CSV and run <code>lct import sheet.csv</code>. Maps columns automatically — approaches, TC, SC, takeaways all come through.</p>
+      </div>
+      <div class="card blue">
+        <h3>Stats & Streak</h3>
+        <p>See total problems by difficulty, breakdown by topic and DS/Algo, and your current solving streak — all from <code>lct stats</code>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: All Commands -->
+  <div class="slide">
+    <div class="slide-number">03 / 07</div>
+    <h2>All 13 Commands</h2>
+    <div class="grid-2">
+      <div>
+        <h3>Core</h3>
+        <div class="cmd">lct add 1 "Two Sum" easy --topic arrays</div>
+        <div class="cmd">lct show "two sum"</div>
+        <div class="cmd">lct comment "two sum" "Classic HashMap"</div>
+        <div class="cmd">lct takeaway "two sum" "Think HashMap first"</div>
+        <div class="cmd">lct approach "two sum"   # interactive</div>
+        <div class="cmd">lct delete "two sum"</div>
+        <br/>
+        <h3>Listing & Search</h3>
+        <div class="cmd">lct list --topic arrays</div>
+        <div class="cmd">lct list --difficulty medium</div>
+        <div class="cmd">lct list --search "cycle"</div>
+        <div class="cmd">lct list --sort recent</div>
+      </div>
+      <div>
+        <h3>Review & Stats</h3>
+        <div class="cmd">lct revisit "two sum"</div>
+        <div class="cmd">lct review --days 7</div>
+        <div class="cmd">lct stats</div>
+        <div class="cmd">lct stats --topic graphs</div>
+        <br/>
+        <h3>Digest & Export</h3>
+        <div class="cmd">lct digest graphs</div>
+        <div class="cmd">lct digest graphs --export</div>
+        <div class="cmd">lct export</div>
+        <div class="cmd">lct import ~/Downloads/sheet.csv</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: Architecture -->
+  <div class="slide">
+    <div class="slide-number">04 / 07</div>
+    <h2>Architecture</h2>
+    <div class="grid-2">
+      <div>
+        <h3>Project Structure</h3>
+        <div class="card blue">
+          <ul>
+            <li><code>index.js</code> — CLI entry, all command definitions</li>
+            <li><code>src/store.js</code> — read/write JSON data file</li>
+            <li><code>src/resolveQuery.js</code> — ID or name lookup with picker</li>
+            <li><code>src/display.js</code> — colored terminal output</li>
+            <li><code>src/commands/</code> — one file per command</li>
+          </ul>
+        </div>
+        <br/>
+        <h3>Data Storage</h3>
+        <div class="card green">
+          <p>All data stored locally at <code>~/.leetcode-tracker/data.json</code>. No database, no account, no internet required. JSON is human-readable and easy to back up.</p>
+        </div>
+      </div>
+      <div>
+        <h3>Data Shape (per problem)</h3>
+        <div class="card purple" style="font-family: monospace; font-size: 12px; line-height: 1.8; color: #374151;">
+          {<br/>
+          &nbsp;&nbsp;"id": "1",<br/>
+          &nbsp;&nbsp;"title": "Two Sum",<br/>
+          &nbsp;&nbsp;"difficulty": "easy",<br/>
+          &nbsp;&nbsp;"topic": "arrays",<br/>
+          &nbsp;&nbsp;"dsAlgo": "HashMap",<br/>
+          &nbsp;&nbsp;"link": "https://...",<br/>
+          &nbsp;&nbsp;"comment": "...",<br/>
+          &nbsp;&nbsp;"takeaway": "...",<br/>
+          &nbsp;&nbsp;"solvedAt": "2026-05-16T...",<br/>
+          &nbsp;&nbsp;"lastReviewed": "2026-05-16T...",<br/>
+          &nbsp;&nbsp;"revisitCount": 2,<br/>
+          &nbsp;&nbsp;"approaches": [<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;{ "name": "HashMap",<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"timeComplexity": "O(n)",<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"spaceComplexity": "O(n)",<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"solution": "..." }<br/>
+          &nbsp;&nbsp;]<br/>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: Key Technical Decisions -->
+  <div class="slide">
+    <div class="slide-number">05 / 07</div>
+    <h2>Key Technical Decisions</h2>
+    <div class="grid-3">
+      <div class="card blue">
+        <h3>Commander.js for CLI</h3>
+        <p>Commander is the standard Node.js CLI framework. It handles argument parsing, option flags, help text, and subcommands — so the code focuses on logic, not parsing.</p>
+      </div>
+      <div class="card green">
+        <h3>JSON over SQLite</h3>
+        <p>With ~500 records max, JSON is fast enough. It's human-readable, portable, easy to back up, and requires zero setup. SQLite would add complexity with no real benefit at this scale.</p>
+      </div>
+      <div class="card purple">
+        <h3>resolve() for lookups</h3>
+        <p>Instead of forcing users to remember problem IDs, <code>resolve()</code> checks by ID first, then falls back to partial title match. If ambiguous, Inquirer.js shows a picker — no crash, no frustration.</p>
+      </div>
+      <div class="card orange">
+        <h3>~/.leetcode-tracker storage</h3>
+        <p>Storing in the home directory means data persists globally — switching projects or terminals doesn't affect it. This is the same convention used by tools like <code>~/.ssh</code> and <code>~/.gitconfig</code>.</p>
+      </div>
+      <div class="card red">
+        <h3>Inquirer for approach input</h3>
+        <p>The <code>approach</code> command uses an interactive prompt with an <code>editor</code> type — it opens your default text editor for multi-line solution input, same as <code>git commit</code>.</p>
+      </div>
+      <div class="card blue">
+        <h3>Published to npm</h3>
+        <p>Publishing to npm means anyone can install with <code>npm install -g leetcode-tracker</code>. This is the deployment equivalent for CLI tools — it makes the project real and usable by others.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: Resume Bullets -->
+  <div class="slide">
+    <div class="slide-number">06 / 07</div>
+    <h2>How to Describe This on Your Resume</h2>
+    <div class="card blue" style="margin-bottom: 24px;">
+      <h3>Suggested Project Bullet Points</h3>
+      <ul>
+        <li>Built and published a CLI tool to npm (<code>npm install -g leetcode-tracker</code>) for tracking DSA problems with approaches, time/space complexity, and topic-based digests</li>
+        <li>Designed a <code>resolve()</code> function supporting both ID and partial name lookup with an interactive multi-match picker using Inquirer.js</li>
+        <li>Implemented CSV import from Google Sheets, spaced-repetition review reminders, streak tracking, and markdown digest export across 13 commands</li>
+      </ul>
+    </div>
+    <div class="card green" style="margin-bottom: 24px;">
+      <h3>One-line Summary for Interviews</h3>
+      <p>"It's a CLI tool I built and published to npm for tracking DSA problems — you can add problems, attach multiple approaches with complexity analysis, and run a digest command that aggregates all your takeaways for a topic into one view."</p>
+    </div>
+    <div class="card purple">
+      <h3>What makes it stand out</h3>
+      <ul>
+        <li>It's a real tool you actually use — not a tutorial clone</li>
+        <li>Published to npm — anyone can install it</li>
+        <li>Solves a real problem (your own Google Sheet workflow)</li>
+        <li>Shows system design thinking — home directory storage, CSV import, partial name resolution</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Interview Q&A -->
+  <div class="slide">
+    <div class="slide-number">07 / 07</div>
+    <h2>Interview Q&A Prep</h2>
+
+    <div class="qa">
+      <div class="question">Q: Why did you build this?</div>
+      <div class="answer">I was already maintaining a Google Sheet to track DSA problems but it was slow to search and couldn't store my solution code or notes. I wanted something I could use from the terminal while solving problems — so I built it myself and published it to npm so others can use it too.</div>
+    </div>
+
+    <div class="qa">
+      <div class="question">Q: Why a CLI instead of a web app?</div>
+      <div class="answer">When I'm solving problems I'm already in the terminal. A CLI fits the workflow — I can run <code>lct add</code> right after finishing a problem without switching to a browser. It also taught me how real developer tools like git and npm are structured internally.</div>
+    </div>
+
+    <div class="qa">
+      <div class="question">Q: How does the name lookup work?</div>
+      <div class="answer">The <code>resolve()</code> function in store.js first checks for an exact ID match. If that fails, it does a case-insensitive partial title search across all problems. If one match is found it returns it directly. If multiple match, Inquirer.js shows an interactive list picker — so the user never gets a silent wrong result or a crash.</div>
+    </div>
+
+    <div class="qa">
+      <div class="question">Q: How would you scale this or improve it?</div>
+      <div class="answer">A few things: swap JSON for SQLite once the dataset grows (better querying, atomic writes), add a <code>sync</code> command to push data to a GitHub Gist for backup, build a TUI (terminal UI) using blessed or ink for a richer interactive experience, and add LeetCode API integration to auto-populate problem metadata instead of typing it manually.</div>
+    </div>
+  </div>
+
+</body>
+</html>
