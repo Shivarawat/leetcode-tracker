@@ -3,6 +3,10 @@ const resolveQuery = require('../resolveQuery');
 const { upsert } = require('../store');
 const chalk = require('chalk');
 
+// Interactively adds a new approach to a problem.
+// Prompts for: approach name, time/space complexity, solution code (opens editor), and a note.
+// A problem can have multiple approaches — each is stored in the approaches[] array.
+// The `editor` prompt type opens the system's default text editor for writing solution code.
 const approach = async (query) => {
   const problem = await resolveQuery(query);
   if (!problem) return;

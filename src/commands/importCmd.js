@@ -3,6 +3,10 @@ const { parse } = require('csv-parse/sync');
 const { getById, upsert } = require('../store');
 const chalk = require('chalk');
 
+// Imports problems from a CSV file — designed to work with Google Sheets exports.
+// Supports up to 3 approaches per problem (Approach 1/2/3 columns with TC/SC columns).
+// If a problem with the same ID already exists, it updates it (upsert behavior).
+// Skips rows with no ID or no title.
 const importCmd = (filePath) => {
   if (!fs.existsSync(filePath)) {
     console.log(chalk.red(`File not found: ${filePath}`));
@@ -10,6 +14,8 @@ const importCmd = (filePath) => {
   }
 
   const content = fs.readFileSync(filePath, 'utf-8');
+
+  // Parse CSV — columns:true uses first row as header keys
   const records = parse(content, {
     columns: true,
     skip_empty_lines: true,
@@ -19,12 +25,14 @@ const importCmd = (filePath) => {
   let added = 0, skipped = 0, updated = 0;
 
   records.forEach((row) => {
+    // Support both "S. No." and "id" column names
     const id = String(row['S. No.'] ?? row['S.No.'] ?? row['id'] ?? '').trim();
     if (!id) { skipped++; return; }
 
     const title = (row['Problem Statement'] || row['title'] || '').trim();
     if (!title) { skipped++; return; }
 
+    // Build up to 3 approaches from the CSV columns
     const approaches = [];
     const buildApproach = (nameSuffix, tcKey, scKey) => {
       const name = (row[`Approach ${nameSuffix}`] || '').trim();
@@ -41,6 +49,7 @@ const importCmd = (filePath) => {
     buildApproach('2', 'TC2', 'SC2');
     buildApproach('3', 'TC3', 'SC3');
 
+    // Preserve existing timestamps and revisitCount if record already exists
     const existing = getById(id);
     const problem = existing || {
       id,

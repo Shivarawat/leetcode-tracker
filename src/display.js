@@ -1,5 +1,6 @@
 const chalk = require('chalk');
 
+// Maps difficulty string to a chalk color function for terminal output
 const DIFFICULTY_COLOR = {
   easy: chalk.green,
   medium: chalk.yellow,
@@ -7,8 +8,11 @@ const DIFFICULTY_COLOR = {
   unknown: chalk.gray,
 };
 
+// Returns the difficulty string colored appropriately
 const diffColor = (d) => (DIFFICULTY_COLOR[d?.toLowerCase()] || chalk.gray)(d || 'unknown');
 
+// Prints full details of a problem — used by the `show` command
+// Shows all fields: difficulty, topic, tags, link, approaches, takeaway, comment
 const printProblem = (p) => {
   console.log('\n' + chalk.bold.cyan(`#${p.id} — ${p.title}`));
   console.log(`  Difficulty : ${diffColor(p.difficulty)}`);
@@ -35,6 +39,8 @@ const printProblem = (p) => {
   console.log();
 };
 
+// Prints a single-line summary row — used by `list` and `review` commands
+// Truncates long titles to keep the table aligned
 const printRow = (p) => {
   const title = p.title.length > 40 ? p.title.slice(0, 37) + '...' : p.title.padEnd(40);
   const diff = diffColor((p.difficulty || 'unknown').padEnd(7));

@@ -2,16 +2,21 @@ const { getAll } = require('../store');
 const { printRow, diffColor } = require('../display');
 const chalk = require('chalk');
 
+// Lists all problems with optional chained filters and sorting.
+// Filters are applied in sequence — each narrows the already-filtered set.
+// Sort options: recent (by solvedAt), difficulty (easy→hard), revisits (most revisited first).
 const list = (options) => {
   let problems = getAll();
 
   if (!problems.length) { console.log(chalk.yellow('No problems tracked yet.')); return; }
 
+  // Apply filters in sequence
   if (options.topic) problems = problems.filter((p) => p.topic?.toLowerCase().includes(options.topic.toLowerCase()));
   if (options.difficulty) problems = problems.filter((p) => p.difficulty?.toLowerCase() === options.difficulty.toLowerCase());
   if (options.tag) problems = problems.filter((p) => p.tags?.some((t) => t.toLowerCase().includes(options.tag.toLowerCase())));
   if (options.search) problems = problems.filter((p) => p.title?.toLowerCase().includes(options.search.toLowerCase()));
 
+  // Sort if requested
   if (options.sort === 'recent') problems.sort((a, b) => new Date(b.solvedAt) - new Date(a.solvedAt));
   else if (options.sort === 'difficulty') problems.sort((a, b) => ['easy','medium','hard'].indexOf(a.difficulty) - ['easy','medium','hard'].indexOf(b.difficulty));
   else if (options.sort === 'revisits') problems.sort((a, b) => (b.revisitCount || 0) - (a.revisitCount || 0));

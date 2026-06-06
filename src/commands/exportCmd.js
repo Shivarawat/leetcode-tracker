@@ -3,6 +3,8 @@ const path = require('path');
 const { getAll } = require('../store');
 const chalk = require('chalk');
 
+// Exports all problems to a CSV file — defaults to leetcode-export.csv in the current directory.
+// Exports up to 3 approaches per problem. Commas inside fields are escaped with double-quotes.
 const exportCmd = (options) => {
   const problems = getAll();
   if (!problems.length) { console.log(chalk.yellow('No problems to export.')); return; }

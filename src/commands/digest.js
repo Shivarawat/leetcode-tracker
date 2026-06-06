@@ -3,6 +3,9 @@ const path = require('path');
 const { getAll } = require('../store');
 const chalk = require('chalk');
 
+// Generates a learning digest for a topic — groups all takeaways, approaches, and stale problems together.
+// Matches on topic, dsAlgo, or tags — so "graphs" finds problems tagged with BFS, DFS, etc.
+// With --export flag, writes the digest to a markdown file (strips chalk color codes).
 const digest = (topic, options) => {
   const all = getAll();
   const problems = all.filter((p) =>

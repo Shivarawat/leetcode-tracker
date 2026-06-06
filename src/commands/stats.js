@@ -1,6 +1,9 @@
 const { getAll } = require('../store');
 const chalk = require('chalk');
 
+// Displays aggregate statistics across all tracked problems.
+// Optionally filtered to a specific topic with --topic flag.
+// Shows: total count, breakdown by difficulty, breakdown by topic, breakdown by DS/algo, current streak.
 const stats = (options) => {
   let problems = getAll();
   if (!problems.length) { console.log(chalk.yellow('No problems tracked yet.')); return; }
@@ -11,21 +14,22 @@ const stats = (options) => {
   const byDiff = { easy: 0, medium: 0, hard: 0, unknown: 0 };
   problems.forEach((p) => { byDiff[p.difficulty?.toLowerCase() || 'unknown']++; });
 
-  // Count by topic
+  // Group problems by topic
   const byTopic = {};
   problems.forEach((p) => {
     const t = p.topic || 'uncategorized';
     byTopic[t] = (byTopic[t] || 0) + 1;
   });
 
-  // Count by dsAlgo
+  // Group problems by DS/Algo used
   const byAlgo = {};
   problems.forEach((p) => {
     const a = p.dsAlgo || 'unknown';
     byAlgo[a] = (byAlgo[a] || 0) + 1;
   });
 
-  // Streak calculation
+  // Streak = consecutive days where at least one problem was solved.
+  // Deduplicates to one entry per day, sorts descending, walks back counting consecutive days.
   const today = new Date(); today.setHours(0,0,0,0);
   const dates = [...new Set(problems.map((p) => {
     const d = new Date(p.solvedAt); d.setHours(0,0,0,0); return d.getTime();
